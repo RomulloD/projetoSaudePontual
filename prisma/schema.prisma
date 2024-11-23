@@ -20,10 +20,16 @@ model User {
 }
 
 model Medicamento {
-  id                         String  @id @default(uuid())
-  nome_produto               String
-  numero_registro_produto    String
-  situacao_registro          String
-  createdAt                  DateTime @default(now())
-  updatedAt                  DateTime @updatedAt
+  id                        Int      @id @default(autoincrement())
+  tipo_produto              String
+  nome_produto              String
+  data_finalizacao_processo DateTime?
+  categoria_regulatoria     String
+  numero_registro_produto   String   @unique
+  data_vencimento_registro  DateTime?
+  numero_processo           String
+  classe_terapeutica        String
+  empresa_detentora_registro String
+  situacao_registro         String
+  principio_ativo           String?
 }
