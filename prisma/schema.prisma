@@ -17,6 +17,8 @@ model User {
   age      Int    @default(18)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Tratamento Tratamento[]
 }
 
 model Medicamento {
@@ -32,4 +34,18 @@ model Medicamento {
   empresa_detentora_registro String
   situacao_registro         String
   principio_ativo           String?
+
+  Tratamento Tratamento[]
+}
+
+model Tratamento {
+  id                        Int      @id @default(autoincrement())
+  data_inicio               DateTime
+  data_finalizacao          DateTime?
+  medicamento_id            Int
+  user_id                   String
+  user                      User     @relation(fields: [user_id], references: [id])
+  medicamento               Medicamento @relation(fields: [medicamento_id], references: [id])
+  lembrete_tomar_remedio    DateTime?
+  lembrete_remedio_acabando DateTime?
 }
