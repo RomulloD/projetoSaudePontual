@@ -33,7 +33,6 @@ async def create_user(user: User):
         )
     return {'name': user.name, 'age': user.age, 'password': user.password, 'email': user.email}
 
-
 @router.post("/edit_user")
 async def edit_user(user: User, request: Request):
     token = validate_token(request.headers)

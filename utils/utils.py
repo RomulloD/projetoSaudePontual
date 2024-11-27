@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
-
+from fuzzywuzzy import fuzz
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -29,4 +29,6 @@ def validate_token(headers):
     token = authorization_header[7:] if authorization_header and authorization_header.startswith("Bearer ") else None
     return token
 
+def fuzzy_match(a: str, b: str) -> int:
+    return fuzz.partial_ratio(a, b)
 

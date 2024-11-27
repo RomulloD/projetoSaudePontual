@@ -12,7 +12,8 @@ from models.user import User
 from utils.utils import encrypt_password
 from utils.utils import check_password
 from utils.utils import validate_token
-
+from utils.utils import fuzzy_match
+from models.tratamento import Tratamento
 
 router = APIRouter(prefix='/med')
 
@@ -45,3 +46,53 @@ async def get_all_meds(request: Request):
             detail="Ocorreu um erro durante a busca dos medicamentos.",
         )
 
+@router.post('/registrar_tratamento')
+async def registrar_tratamento(request: Request, tratamento: Tratamento):
+    try:
+        token = validate_token(request.headers)
+        if token is None:
+            print("Token não encontrado")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Voce nao tem permissao para isso.",
+            )
+        else:
+            try:
+                decoded_token = jwt.decode(token, "batatafricacombanana", algorithms=["HS256"])
+                print(decoded_token)
+                print(f"Token é válido! Decodificado: {decoded_token}")
+                print(decoded_token["sub"])
+                email = decoded_token["sub"]
+                user = await prisma.user.find_unique(where={"email": email})
+                search_meds = tratamento.nome.lower()
+                medicamento = await prisma.medicamento.find_many()
+                #similarity_threshold = 100
+                # print(medicamento)
+                # print(search_meds)
+                resultado = []
+                for meds in medicamento:
+                    nome_medicamento = meds.nome_produto.lower() if meds.nome_produto.lower else ""
+                    meds_similarity = fuzzy_match(search_meds, nome_medicamento)
+                    #print (meds_similarity)
+                if meds_similarity > 80:
+                    resultado.append({"medicamento": meds, "similaridade": meds_similarity})
+                print(resultado)
+                if not user:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Usuário não encontrado",
+                    )
+                print(user)
+                print(tratamento)
+                return {"results": resultado}
+            except ExpiredSignatureError:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Voce nao tem permissao para isso.",
+                )
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ocorreu um erro durante a busca dos medicamentos.",
+        )
