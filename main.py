@@ -6,15 +6,12 @@ import uvicorn
 from routes.medicamento import router as medicamento_router
 
 async def lifespan(app: FastAPI):
-    # Evento de inicialização do Prisma
     await connect_prisma()
     yield
-    # Evento de desligamento do Prisma
     await prisma.disconnect()
 
 app = FastAPI(lifespan=lifespan)
 
-# Configurações do middleware CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluindo o roteador de usuário
 app.include_router(user_router)
 app.include_router(medicamento_router)
 
